@@ -3,6 +3,7 @@ package au.com.crowtech;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.math3.util.Precision;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -33,15 +35,21 @@ import es.usc.citius.hipster.model.problem.SearchProblem;
  */
 public class App {
 	
+	private static final String PROMPT = "%> ";
+	
 	private static final String REGEX_BASE  = "[A-Z]{3}"; 
 	private static final String REGEX_TERMS = "[A-Z]{3}";
 	private static final String REGEX_NUMBER_VALUE = "[-+]?[0-9]*\\.[0-9]+|[0-9]+";
 
 	HipsterDirectedGraph<String,Double> ratesGraph = null;  // This graph is used to store all the currency pairs
 	
-    @Option(name="-f,--file",usage="Load in a file containing the list of currency base/terms and rates",metaVar="INPUT")
-    private File fileBaseTerms = new File(getClass().getClassLoader().getResource("base_terms.txt").getFile());
- 
+    @Option(name="-q",usage="disable header output for quiet mode")
+    private boolean quiet=false;
+
+	
+    @Option(name="-f",usage="Load in a file containing the list of currency base/terms and rates")
+ //   private File fileBaseTerms = new File(getClass().getClassLoader().getResource("base_terms.txt").getFile());
+    private String fileBaseTerms = null;
  
     // receives direct command line parameters than options
     @Argument
@@ -106,6 +114,7 @@ public class App {
             String regex = "("+REGEX_BASE+")\\s+("+REGEX_NUMBER_VALUE+")\\s+in\\s+("+REGEX_TERMS+")";
             Pattern p = Pattern.compile(regex);
             
+            System.out.print(PROMPT);
             while ((scanner.hasNextLine())) {
             	String line = scanner.nextLine();
             	Matcher matcher = p.matcher(line);
@@ -113,9 +122,14 @@ public class App {
   	        		String base = matcher.group(1);
   	        		String terms = matcher.group(3);
   	        		Double baseValue = Double.parseDouble(matcher.group(2));
-  	        		calculateRate(base,terms,baseValue);
+  	        		Double result = calculateRate(base,terms,baseValue);
+  	        		Double roundedResult = Precision.round(result,2);
+  	        		DecimalFormat df = new DecimalFormat("#.##");
+  	        		System.out.println(base+" "+ df.format(baseValue)+" = "+terms+" "+ df.format(roundedResult));
+  	        	} else {
+  	        		// display usage
   	        	}
-                
+                System.out.print(PROMPT);
             }
             scanner.close();
         } catch (Exception e) {
@@ -123,7 +137,14 @@ public class App {
         }
     }
     
-  private void loadBaseTerms(File baseTermsFile) throws FileNotFoundException {
+  private void loadBaseTerms(String fileBaseTermsPath) throws FileNotFoundException {
+	  File fileBaseTerms = null;
+	  
+	  if (fileBaseTermsPath == null) {
+		  fileBaseTerms = new File(getClass().getClassLoader().getResource("base_terms.txt").getFile());
+	  } else {
+		  fileBaseTerms = new File(fileBaseTermsPath);
+	  }
 	  
 		// Create a simple weighted directed graph with Hipster where
 		// vertices are Strings and edge values are just doubles
@@ -132,7 +153,7 @@ public class App {
 	     
 
 
-	  Scanner sc=new Scanner(baseTermsFile);
+	  Scanner sc=new Scanner(fileBaseTerms);
 
 	  try {
 
@@ -169,7 +190,7 @@ public class App {
 	  }
   }
   
-   private void calculateRate(String base, String terms, Double baseValue) {
+   private Double calculateRate(String base, String terms, Double baseValue) {
 
 	// Create the search problem. For graph problems, just use
 	// the GraphSearchProblem util class to generate the problem with ease.
@@ -188,8 +209,8 @@ public class App {
 	
 	Double conversionValue = baseValue * conversionRate;
 	
-    System.out.println("CurrencyPath = "+recoverStatePath+" with conversion = "+conversionRate+" with final value= "+conversionValue+" "+terms);
+  //  System.out.println("CurrencyPath = "+recoverStatePath+" with conversion = "+conversionRate+" with final value= "+conversionValue+" "+terms);
         
-
+	return conversionValue;
   }
 }
