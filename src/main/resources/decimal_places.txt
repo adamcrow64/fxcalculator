@@ -1,0 +1,11 @@
+AUD=2 decimal places
+CAD=2 decimal places
+CNY=2 decimal places
+CZK=2 decimal places
+DKK=2 decimal places
+EUR=2 decimal places
+GBP=2 decimal places
+JPY=0 decimal places
+NOK=2 decimal places
+NZD=2 decimal places
+USD=2 decimal places
