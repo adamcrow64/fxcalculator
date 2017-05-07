@@ -45,17 +45,18 @@ public class App {
 	private static final Integer COLUMN_SIZE = 120; // used for terminal width
 
 	private static final String PROMPT = "%> ";
+	private static final String EXIT_TO_QUIT = "Type 'exit' to quit shell.";
 	private static final String FINISHED = "Finished"; // useful for IDE
 														// consoles.
 
 	private static final Integer DEFAULT_PRECISION = 2;
 
-	private static final String ERROR_MSG_BAD_COMMAND_SYNTAX = "Bad Syntax: should be <ccy1> <amount1> in <ccy2> e.g AUD 100.00 in USD";
+	private static final String ERROR_MSG_BAD_COMMAND_SYNTAX = "Syntax should be <ccy1> <amount1> in <ccy2> e.g AUD 100.00 in USD\n"+EXIT_TO_QUIT;
 	private static final String ERROR_MSG_NEGATIVE_NUMBER = "Amount must be positive";
 	private static final String ERROR_MSG_UNABLE_TO_FIND_RATE = "Unable to find rate for ";
 
-	private static final String REGEX_BASE = "[A-Z]{3}";
-	private static final String REGEX_TERMS = "[A-Z]{3}";
+	private static final String REGEX_BASE = "[a-zA-Z]{3}";
+	private static final String REGEX_TERMS = "[a-zA-Z]{3}";
 	private static final String REGEX_NUMBER_VALUE = "[+-]?[0-9]*[\\.]?[0-9]*"; // allow
 																				// 100.
 																				// and
@@ -161,6 +162,7 @@ public class App {
 
 	private void showTitle() {
 		System.out.println(TITLE);
+		System.out.println(EXIT_TO_QUIT);
 	}
 
 	private void processCommandLines() {
@@ -173,7 +175,7 @@ public class App {
 			System.out.print(PROMPT);
 			while ((scanner.hasNextLine())) {
 				String line = scanner.nextLine();
-				if (("exit".equals(line))||(!processCommandLine(line))) {  // note the order of execution
+				if (("quit".equals(line))||("exit".equals(line))||(!processCommandLine(line))) {  // note the order of execution
 					break;
 				}
 				System.out.print(PROMPT);
@@ -193,8 +195,8 @@ public class App {
 			if (StringUtils.isEmpty(line)) {
 				return false;
 			}
-			String base = matcher.group(1);
-			String terms = matcher.group(3);
+			String base = matcher.group(1).toUpperCase();
+			String terms = matcher.group(3).toUpperCase();
 			// Normally we should check if base and terms exist in the Currency
 			// Set, but the specs do not require it.
 			Double baseValue = Double.parseDouble(matcher.group(2));
