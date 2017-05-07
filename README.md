@@ -28,3 +28,8 @@ Usage: fxcalculator [options]
     -V, --version
       Output version information and exit
       Default: false
+
+```bash
+$ ./fetch.sh > latest_rates.txt
+$ java -jar target/fxcalculator.jar -fr latest_rates.txt
+```

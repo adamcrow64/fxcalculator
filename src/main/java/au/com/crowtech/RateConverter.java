@@ -67,7 +67,20 @@ public class RateConverter {
 			System.exit(1); // // return non zero error for use in scripting
 		}
 	}
-	
+
+	/**
+     * Import the Base/Terms data from an input Source into a Graph.
+     * <p>
+     * This method will parse the each line of a supplied Base/Terms Rates data file to confirm validity of the line format.
+     * It will then save each Currency Code to a HashSet so that any RateConversion can confirm the existence of the code before 
+     * attempting to process the conversion path.
+     * Each pair of currencies and their rate is added as two Vertices (codes) and an edge between them (rate).
+     * Then the reverse conversion is added by adding the Vertices in a reversed fashion with an inverted rate (zero rate is checked).
+      *
+     * @param in InputStream Data containing the Base/Terms data
+     * @throws FileNotFoundException
+     */
+
 	public void loadBaseTerms(InputStream in) throws FileNotFoundException {
 		BufferedReader input = null;
 
@@ -87,14 +100,18 @@ public class RateConverter {
 				Pattern p = Pattern
 						.compile("^(" + REGEX_BASE + ")[\\/]?(" + REGEX_TERMS + ")\\=(" + REGEX_NUMBER_VALUE + ")$");
 
+				// Loop through each supplied Data Line
 				while (sc.hasNextLine()) {
 					String line = sc.nextLine();
 					Matcher matcher = p.matcher(line);
 					if (matcher.find()) {
 						String base = matcher.group(1);
 						String terms = matcher.group(2);
+						
+						// Add to a set so that we can check the validity of supplied currency codes int the command line
 						currencySet.add(base);
 						currencySet.add(terms);
+						
 						Double rate = Double.parseDouble(matcher.group(3)); // Note
 																			// number
 																			// exception
@@ -103,8 +120,7 @@ public class RateConverter {
 																			// in
 																			// regex
 						if (rate > 0.0) {
-							// Add pair
-
+							// Add pair to graph
 							gb.connect(base).to(terms).withEdge(rate);
 							// invert rate and add reverse pair
 							Double invRate = 1.0 / rate;
@@ -127,7 +143,7 @@ public class RateConverter {
 				System.exit(1);
 			} finally {
 				sc.close();
-				ratesGraph = gb.createDirectedGraph();
+				ratesGraph = gb.createDirectedGraph();  
 			}
 
 		} finally {
@@ -141,6 +157,24 @@ public class RateConverter {
 	}
 
 
+	/**
+     * Calculate the Conversion Rate for the Base and Terms pair and a base Value..
+     * <p>
+     * This method firstly checks that the base and the terms exist in the system.
+     * Then the method establishes a graphSearch so that the path between the Base and the Terms currency can be found.
+     * This saves a lot of code and will work across a wide variety and complex path routes.
+     * The shortest conversion path is found by finding the path from base to terms that has the smallest sum of rate edges. (This is fine in practice 
+     * and quick to do for this example).
+     * If no path is found then a path error is issued.
+     * Otherwise each progressive path stage is multiplied by the previous stage to end up with a final conversion rate.
+     * This calculated rate is then applied to the input baseValue to generate the final converted value.
+      *
+     * @param base  currency code
+     * @param terms currency code
+     * @param base Value 
+     * @return conversion value
+     * @throws NoCurrencyConversionPathException
+     */
 	public Double calculateRate(String base, String terms, Double baseValue) throws NoCurrencyConversionPathException {
 
 		// Confirm existence of input currencies
