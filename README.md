@@ -33,3 +33,8 @@ Usage: fxcalculator [options]
 $ ./fetch.sh > latest_rates.txt
 $ java -jar target/fxcalculator.jar -fr latest_rates.txt
 ```
+
+```bash
+$ ./build-docker.sh
+$ docker run -it --rm adamcrow64/fxcalculator 
+```
