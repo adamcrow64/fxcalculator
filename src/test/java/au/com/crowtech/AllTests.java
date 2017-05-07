@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-                LoadingTest.class,
+                CurrencyPrecisionsTest.class,
                 CommandLineTest.class,
                 RateConverterTest.class})
 

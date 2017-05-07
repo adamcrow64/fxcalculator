@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -47,7 +48,7 @@ public class CurrencyPrecisions {
 
 			try {
 
-				Pattern p = Pattern.compile("(" + REGEX_BASE + ")\\=(\\d+)");
+				Pattern p = Pattern.compile("^(" + REGEX_BASE + ")\\=(\\d+)\\sdecimal\\splaces");
 
 				while (sc.hasNextLine()) {
 					String line = sc.nextLine();
@@ -62,7 +63,7 @@ public class CurrencyPrecisions {
 							System.out.println("Setting " + currencyCode + " Precision to " + precisionStr);
 						}
 					} else {
-						System.out.println("Decimal Precisions File Syntax error at line :" + line);
+						System.err.println("Decimal Precisions File Syntax error at line :" + line);
 					}
 				}
 
@@ -87,8 +88,29 @@ public class CurrencyPrecisions {
 			precision = DEFAULT_PRECISION;
 
 		Double roundedResult = Precision.round(value, precision);
-		String form = "%." + precision + "f";
-		return String.format(form, roundedResult);
+		
+		DecimalFormat df = new DecimalFormat("0.000000000000000000000");
+		df.setMinimumFractionDigits(precision);
+		String ret = df.format(roundedResult);
+		return ret;
 
 	}
+	
+
+
+	/**
+	 * @return the currencyPrecisionMap
+	 */
+	public Map<String, Integer> getCurrencyPrecisionMap() {
+		return currencyPrecisionMap;
+	}
+
+	/**
+	 * @param currencyPrecisionMap the currencyPrecisionMap to set
+	 */
+	public void setCurrencyPrecisionMap(Map<String, Integer> currencyPrecisionMap) {
+		this.currencyPrecisionMap = currencyPrecisionMap;
+	}
+	
+	
 }

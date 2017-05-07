@@ -5,8 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,6 +51,8 @@ public class RateConverter {
 	// currencies
 	//
 
+	private Set<String> currencySet = new HashSet<String>();  // used to confirm existance (TODO: check existence of state in graph instead)
+	
 	private boolean verbose = false;
 	
 	
@@ -81,7 +85,7 @@ public class RateConverter {
 			try {
 
 				Pattern p = Pattern
-						.compile("(" + REGEX_BASE + ")[\\/]?(" + REGEX_TERMS + ")\\=(" + REGEX_NUMBER_VALUE + ")");
+						.compile("^(" + REGEX_BASE + ")[\\/]?(" + REGEX_TERMS + ")\\=(" + REGEX_NUMBER_VALUE + ")$");
 
 				while (sc.hasNextLine()) {
 					String line = sc.nextLine();
@@ -89,6 +93,8 @@ public class RateConverter {
 					if (matcher.find()) {
 						String base = matcher.group(1);
 						String terms = matcher.group(2);
+						currencySet.add(base);
+						currencySet.add(terms);
 						Double rate = Double.parseDouble(matcher.group(3)); // Note
 																			// number
 																			// exception
@@ -109,11 +115,11 @@ public class RateConverter {
 										"Added " + base + " -> " + terms + " at " + rate + " and inverse " + invRate);
 							}
 						} else {
-							System.out.println("Loading Base/Terms Rate error at line :" + line
+							System.err.println("Loading Base/Terms Rate error at line :" + line
 									+ " , Rate must be zero or positive");
 						}
 					} else {
-						System.out.println("Loading Base/Terms  Syntax error at line :" + line);
+						System.err.println("Loading Base/Terms  Syntax error at line :" + line);
 					}
 				}
 
@@ -137,6 +143,11 @@ public class RateConverter {
 
 	public Double calculateRate(String base, String terms, Double baseValue) throws NoCurrencyConversionPathException {
 
+		// Confirm existence of input currencies
+		if (!(currencySet.contains(base) && currencySet.contains(terms))) {
+			throw new NoCurrencyConversionPathException(base, terms);
+		}
+		
 		// Create the search problem. For graph problems, just use
 		// the GraphSearchProblem util class to generate the problem with ease.
 		SearchProblem<Double, String, WeightedNode<Double, String, Double>> p = GraphSearchProblem.startingFrom(base)

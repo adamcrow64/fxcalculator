@@ -170,7 +170,7 @@ public class App {
 
 	private boolean processCommandLine(String line) {
 
-		String regex = "^$|(" + REGEX_BASE + ")\\s+(" + REGEX_NUMBER_VALUE + ")\\s+in\\s+(" + REGEX_TERMS + ")";
+		String regex = "^$|^(" + REGEX_BASE + ")\\s+(" + REGEX_NUMBER_VALUE + ")\\s+in\\s+(" + REGEX_TERMS + ")";
 		Pattern p = Pattern.compile(regex);
 		Matcher matcher = p.matcher(line);
 		if (matcher.find()) {
@@ -188,14 +188,14 @@ public class App {
 					System.out.println(base + " " + currencyPrecisions.formattedValue(base, baseValue) + " = " + terms + " "
 							+ currencyPrecisions.formattedValue(terms, result));
 				} catch (NoCurrencyConversionPathException e) {
-					System.out.println(ERROR_MSG_UNABLE_TO_FIND_RATE + e.getBaseTerms());
+					System.err.println(ERROR_MSG_UNABLE_TO_FIND_RATE + e.getBaseTerms());
 				}
 			} else {
-				System.out.println(ERROR_MSG_NEGATIVE_NUMBER + " " + baseValue);
+				System.err.println(ERROR_MSG_NEGATIVE_NUMBER + " " + baseValue);
 			}
 		} else {
 			// display description
-			System.out.println(ERROR_MSG_BAD_COMMAND_SYNTAX);
+			System.err.println(ERROR_MSG_BAD_COMMAND_SYNTAX);
 		}
 		return true;
 	}
