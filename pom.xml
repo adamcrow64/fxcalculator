@@ -17,7 +17,7 @@
 
 		<junit-version>4.12</junit-version>
 		<log4j-core-version>2.5</log4j-core-version>
-		<jcommander-version>1.48</jcommander-version>
+		<jcommander-version>1.69</jcommander-version>
 
 	</properties>
 
@@ -51,6 +51,13 @@
 			<version>${junit-version}</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.beust/jcommander -->
+		<dependency>
+			<groupId>com.beust</groupId>
+			<artifactId>jcommander</artifactId>
+			<version>${jcommander-version}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>args4j</groupId>
 			<artifactId>args4j</artifactId>
